@@ -1,63 +1,102 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Three.js Rotating Spheres</title>
-    <style>
-        body { margin: 0; }
-        canvas { display: block; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>レポート課題</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/99/three.min.js"></script>
 </head>
+
 <body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script>
-        // シーン、カメラ、レンダラーを設定
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+  <script>
+    var width = 800,
+      height = 600;
 
-        // 球のジオメトリとマテリアルを作成
-        const geometry = new THREE.SphereGeometry(1, 32, 32);
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    // レンダラーを作成
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setSize(width, height);
+    document.body.appendChild(renderer.domElement);
 
-        // 球を3つ作成
-        const sphere1 = new THREE.Mesh(geometry, material);
-        const sphere2 = new THREE.Mesh(geometry, material);
-        const sphere3 = new THREE.Mesh(geometry, material);
+    // シーンを作成
+    var scene = new THREE.Scene();
 
-        // 球の位置を設定
-        sphere1.position.set(-3, 0, 0);
-        sphere2.position.set(0, 0, 0);
-        sphere3.position.set(3, 0, 0);
+    // カメラを作成
+    var camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
 
-        // 球をシーンに追加
-        scene.add(sphere1);
-        scene.add(sphere2);
-        scene.add(sphere3);
+    // 星型の形状を作成
+    function createStarShape() {
+      const shape = new THREE.Shape();
+      const outerRadius = 1;
+      const innerRadius = 0.5;
+      const numPoints = 5;
 
-        // カメラの位置を設定
-        camera.position.z = 5;
-
-        // アニメーション関数
-        function animate() {
-            requestAnimationFrame(animate);
-
-            // 球を回転させる
-            sphere1.rotation.x += 0.01;
-            sphere1.rotation.y += 0.01;
-            sphere2.rotation.x += 0.01;
-            sphere2.rotation.y += 0.01;
-            sphere3.rotation.x += 0.01;
-            sphere3.rotation.y += 0.01;
-
-            renderer.render(scene, camera);
+      for (let i = 0; i < numPoints * 2; i++) {
+        const angle = (i / (numPoints * 2)) * Math.PI * 2;
+        const radius = i % 2 === 0 ? outerRadius : innerRadius;
+        const x = Math.cos(angle) * radius;
+        const y = Math.sin(angle) * radius;
+        if (i === 0) {
+          shape.moveTo(x, y);
+        } else {
+          shape.lineTo(x, y);
         }
+      }
+      shape.closePath();
+      return shape;
+    }
 
-        // アニメーションを開始
-        animate();
-    </script>
+    const starShape = createStarShape();
+    const extrudeSettings = {
+      steps: 2,
+      depth: 0.5,
+      bevelEnabled: true,
+      bevelThickness: 0.1,
+      bevelSize: 0.1,
+      bevelOffset: 0,
+      bevelSegments: 1
+    };
+    const geometry = new THREE.ExtrudeGeometry(starShape, extrudeSettings);
+    const material = new THREE.MeshPhongMaterial({
+      color: 0xffff00,
+      shininess: 100
+    });
+
+    // 平行光源1
+    var directionalLight1 = new THREE.DirectionalLight(0xffffff);
+    directionalLight1.position.set(1, 1, 1);
+    // シーンに追加
+    scene.add(directionalLight1);
+    // 平行光源2
+    var directionalLight2 = new THREE.DirectionalLight(0xffffff);
+    directionalLight2.position.set(-1, 1, 1);
+    // シーンに追加
+    scene.add(directionalLight2);
+
+    // 星型メッシュを作成
+    const star = new THREE.Mesh(geometry, material);
+
+    // 星型メッシュの位置を設定
+    star.position.set(0, 0, 0);
+
+    // 星型メッシュをシーンに追加
+    scene.add(star);
+
+    // カメラの位置を設定
+    camera.position.z = 5;
+
+    // 初回実行
+    var update = function() {
+      requestAnimationFrame(update);
+
+      // 箱を回転させる
+      star.rotation.x += 0.01;
+      star.rotation.y += 0.01;
+
+      renderer.render(scene, camera);
+    };
+    update();
+  </script>
 </body>
+
 </html>
