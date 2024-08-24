@@ -34,6 +34,7 @@
       var textureLoader = new THREE.TextureLoader();
       var texture = textureLoader.load("ganba.png");
       var mat = new THREE.MeshPhongMaterial();
+      mat.map = texture;
 
       // 箱を作成
       var geometry = new THREE.CylinderGeometry(0.7, 0.1, 0.9, 32, 1);
